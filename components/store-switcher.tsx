@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 // Custom hooks.
-import { useStoreModal } from "@/hooks/use-store-modal";
+import useStoreModal from "@/hooks/use-store-modal";
 
 // Types.
 import { Button } from "@/components/ui/button";

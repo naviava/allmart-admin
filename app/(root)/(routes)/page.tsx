@@ -4,7 +4,7 @@
 import { useEffect } from "react";
 
 // Custom hooks.
-import { useStoreModal } from "@/hooks/use-store-modal";
+import useStoreModal from "@/hooks/use-store-modal";
 
 export default function SetupPage() {
   const onOpen = useStoreModal((state) => state.onOpen);

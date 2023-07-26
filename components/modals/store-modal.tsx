@@ -11,7 +11,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 // Custom hooks.
-import { useStoreModal } from "@/hooks/use-store-modal";
+import useStoreModal from "@/hooks/use-store-modal";
 
 // Components.
 import Modal from "@/components/ui/modal";
