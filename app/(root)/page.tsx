@@ -6,9 +6,6 @@ import { useEffect } from "react";
 // Custom hooks.
 import { useStoreModal } from "@/hooks/use-store-modal";
 
-// Components.
-import Modal from "@/components/ui/modal";
-
 export default function HomePage() {
   const onOpen = useStoreModal((state) => state.onOpen);
   const isOpen = useStoreModal((state) => state.isOpen);
