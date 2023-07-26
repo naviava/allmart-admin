@@ -6,7 +6,7 @@ import { useEffect } from "react";
 // Custom hooks.
 import { useStoreModal } from "@/hooks/use-store-modal";
 
-export default function HomePage() {
+export default function SetupPage() {
   const onOpen = useStoreModal((state) => state.onOpen);
   const isOpen = useStoreModal((state) => state.isOpen);
 
@@ -14,5 +14,5 @@ export default function HomePage() {
     if (!isOpen) onOpen();
   }, [isOpen, onOpen]);
 
-  return <div className="p-4">Hello World!</div>;
+  return null;
 }
