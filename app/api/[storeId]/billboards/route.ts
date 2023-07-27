@@ -7,50 +7,54 @@ import { auth } from "@clerk/nextjs";
 // Lib and utils.
 import prismadb from "@/lib/prismadb";
 
-export async function PATCH(
+export async function POST(
   req: Request,
   { params }: { params: { storeId: string } }
 ) {
   try {
     const { userId } = auth();
     const body = await req.json();
-    const { name } = body;
+    const { label, imageUrl } = body;
 
     if (!userId) return new NextResponse("Unauthenticated", { status: 401 });
-    if (!name) return new NextResponse("Name is required", { status: 400 });
+    if (!label) return new NextResponse("Label is required", { status: 400 });
+    if (!imageUrl)
+      return new NextResponse("Image URL is required", { status: 400 });
     if (!params.storeId)
       return new NextResponse("Store ID is required", { status: 400 });
 
-    const store = await prismadb.store.updateMany({
+    const storeByUserId = await prismadb.store.findFirst({
       where: { id: params.storeId, userId },
-      data: { name },
+    });
+    if (!storeByUserId)
+      return new NextResponse("Unauthorized", { status: 403 });
+
+    const billboard = await prismadb.billboard.create({
+      data: { label, imageUrl, storeId: params.storeId },
     });
 
-    return NextResponse.json(store);
+    return NextResponse.json(billboard);
   } catch (err) {
-    console.log("[STORE_PATCH]", err);
+    console.log("[BILLBOARDS_POST]", err);
     return new NextResponse("Internal error", { status: 500 });
   }
 }
 
-export async function DELETE(
-  _req: Request,
+export async function GET(
+  req: Request,
   { params }: { params: { storeId: string } }
 ) {
   try {
-    const { userId } = auth();
-    if (!userId) return new NextResponse("Unauthenticated", { status: 401 });
-
     if (!params.storeId)
       return new NextResponse("Store ID is required", { status: 400 });
 
-    const store = await prismadb.store.deleteMany({
-      where: { id: params.storeId, userId },
+    const billboards = await prismadb.billboard.findMany({
+      where: { storeId: params.storeId },
     });
 
-    return NextResponse.json(store);
+    return NextResponse.json(billboards);
   } catch (err) {
-    console.log("[STORE_DELETE]", err);
+    console.log("[BILLBOARDS_GET]", err);
     return new NextResponse("Internal error", { status: 500 });
   }
 }
