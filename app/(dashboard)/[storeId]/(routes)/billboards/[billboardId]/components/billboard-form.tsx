@@ -12,9 +12,6 @@ import { Trash } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-// Custom hooks.
-import useOrigin from "@/hooks/use-origin";
-
 // Types.
 import { Billboard } from "@prisma/client";
 
@@ -91,8 +88,8 @@ export default function BillboardForm({ initialData }: BillboardFormProps) {
         `/api/${params.storeId}/billboards/${params.billboardId}`
       );
       router.refresh();
-      router.push("/");
-      toast.success("Store deleted");
+      router.push(`/${params.storeId}/billboards`);
+      toast.success("Billboard deleted");
     } catch (err) {
       toast.error("Make sure you removed all categories using this billboard");
     } finally {
@@ -170,7 +167,6 @@ export default function BillboardForm({ initialData }: BillboardFormProps) {
           </Button>
         </form>
       </Form>
-      <Separator />
     </>
   );
 }
