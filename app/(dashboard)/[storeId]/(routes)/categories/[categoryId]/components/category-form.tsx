@@ -13,7 +13,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 // Types.
-import { Category } from "@prisma/client";
+import { Billboard, Category } from "@prisma/client";
 
 // Components.
 import Heading from "@/components/ui/heading";
@@ -21,6 +21,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import AlertModal from "@/components/modals/alert-modal";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Form,
   FormControl,
@@ -39,9 +46,13 @@ type CategoryFormValues = z.infer<typeof formSchema>;
 
 interface CategoryFormProps {
   initialData: Category | null;
+  billboards: Billboard[];
 }
 
-export default function CategoryForm({ initialData }: CategoryFormProps) {
+export default function CategoryForm({
+  initialData,
+  billboards,
+}: CategoryFormProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const params = useParams();
@@ -65,13 +76,13 @@ export default function CategoryForm({ initialData }: CategoryFormProps) {
 
       if (initialData)
         await axios.patch(
-          `/api/${params.storeId}/billboards/${params.billboardId}`,
+          `/api/${params.storeId}/categories/${params.categoryId}`,
           data
         );
-      else await axios.post(`/api/${params.storeId}/billboards`, data);
+      else await axios.post(`/api/${params.storeId}/categories`, data);
 
       router.refresh();
-      router.push(`/${params.storeId}/billboards`);
+      router.push(`/${params.storeId}/categories`);
       toast.success(toastMessage);
     } catch (err) {
       toast.error("Something went wrong");
@@ -84,13 +95,13 @@ export default function CategoryForm({ initialData }: CategoryFormProps) {
     try {
       setLoading(true);
       await axios.delete(
-        `/api/${params.storeId}/billboards/${params.billboardId}`
+        `/api/${params.storeId}/categories/${params.categoryId}`
       );
       router.refresh();
-      router.push(`/${params.storeId}/billboards`);
-      toast.success("Billboard deleted");
+      router.push(`/${params.storeId}/categories`);
+      toast.success("Category deleted");
     } catch (err) {
-      toast.error("Make sure you removed all categories using this billboard");
+      toast.error("Make sure you removed all products using this category");
     } finally {
       setLoading(false);
       setOpen(false);
@@ -138,6 +149,38 @@ export default function CategoryForm({ initialData }: CategoryFormProps) {
                       {...field}
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="billboardId"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Billboard</FormLabel>
+                  <Select
+                    disabled={loading}
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue
+                          defaultValue={field.value}
+                          placeholder="Select a billboard"
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {billboards.map((billboard) => (
+                        <SelectItem key={billboard.id} value={billboard.id}>
+                          {billboard.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
