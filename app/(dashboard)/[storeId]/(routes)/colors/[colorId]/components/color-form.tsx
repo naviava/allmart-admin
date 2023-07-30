@@ -13,7 +13,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 // Types.
-import { Size } from "@prisma/client";
+import { Color } from "@prisma/client";
 
 // Components.
 import Heading from "@/components/ui/heading";
@@ -32,46 +32,49 @@ import {
 
 const formSchema = z.object({
   name: z.string().min(1),
-  value: z.string().min(1),
+  value: z
+    .string()
+    .min(4)
+    .regex(/^#/, { message: "Value must be a valid hex code." }),
 });
 
-type SizeFormValues = z.infer<typeof formSchema>;
+type ColorFormValues = z.infer<typeof formSchema>;
 
-interface SizeFormProps {
-  initialData: Size | null;
+interface ColorFormProps {
+  initialData: Color | null;
 }
 
-export default function SizeForm({ initialData }: SizeFormProps) {
+export default function ColorForm({ initialData }: ColorFormProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const params = useParams();
   const router = useRouter();
 
-  const title = initialData ? "Edit size" : "Create size";
+  const title = initialData ? "Edit color" : "Create color";
   const description = initialData
-    ? "Make changes to your existing size"
-    : "Add a new size";
-  const toastMessage = initialData ? "Size updated" : "Size created";
+    ? "Make changes to your existing color"
+    : "Add a new color";
+  const toastMessage = initialData ? "Color updated" : "Color created";
   const action = initialData ? "Save changes" : "Create";
 
-  const form = useForm<SizeFormValues>({
+  const form = useForm<ColorFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || { name: "", value: "" },
   });
 
-  async function onSubmit(data: SizeFormValues) {
+  async function onSubmit(data: ColorFormValues) {
     try {
       setLoading(true);
 
       if (initialData)
         await axios.patch(
-          `/api/${params.storeId}/sizes/${params.sizeId}`,
+          `/api/${params.storeId}/colors/${params.colorId}`,
           data
         );
-      else await axios.post(`/api/${params.storeId}/sizes`, data);
+      else await axios.post(`/api/${params.storeId}/colors`, data);
 
       router.refresh();
-      router.push(`/${params.storeId}/sizes`);
+      router.push(`/${params.storeId}/colors`);
       toast.success(toastMessage);
     } catch (err) {
       toast.error("Something went wrong");
@@ -83,12 +86,12 @@ export default function SizeForm({ initialData }: SizeFormProps) {
   async function onDelete() {
     try {
       setLoading(true);
-      await axios.delete(`/api/${params.storeId}/sizes/${params.sizeId}`);
+      await axios.delete(`/api/${params.storeId}/colors/${params.colorId}`);
       router.refresh();
-      router.push(`/${params.storeId}/sizes`);
-      toast.success("Size deleted");
+      router.push(`/${params.storeId}/colors`);
+      toast.success("Color deleted");
     } catch (err) {
-      toast.error("Make sure you removed all products using this size");
+      toast.error("Make sure you removed all products using this color");
     } finally {
       setLoading(false);
       setOpen(false);
@@ -132,7 +135,7 @@ export default function SizeForm({ initialData }: SizeFormProps) {
                   <FormControl>
                     <Input
                       disabled={loading}
-                      placeholder="Size name"
+                      placeholder="Color name"
                       {...field}
                     />
                   </FormControl>
@@ -147,11 +150,17 @@ export default function SizeForm({ initialData }: SizeFormProps) {
                 <FormItem>
                   <FormLabel>Value</FormLabel>
                   <FormControl>
-                    <Input
-                      disabled={loading}
-                      placeholder="Size value"
-                      {...field}
-                    />
+                    <div className="flex items-center gap-x-4">
+                      <Input
+                        disabled={loading}
+                        placeholder="Color value"
+                        {...field}
+                      />
+                      <div
+                        className="border p-4 rounded-full"
+                        style={{ backgroundColor: field.value }}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
