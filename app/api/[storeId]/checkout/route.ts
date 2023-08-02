@@ -1,10 +1,6 @@
-// Next.
+import Stripe from "stripe";
 import { NextResponse } from "next/server";
 
-// External packages.
-import Stripe from "stripe";
-
-// Lib and utils.
 import { stripe } from "@/lib/stripe";
 import prismadb from "@/lib/prismadb";
 
@@ -25,20 +21,27 @@ export async function POST(
   const { productIds } = await req.json();
 
   if (!productIds || productIds.length === 0) {
-    return new NextResponse("Product IDs are required.", { status: 400 });
+    return new NextResponse("Product ids are required", { status: 400 });
   }
 
   const products = await prismadb.product.findMany({
-    where: { id: { in: productIds } },
+    where: {
+      id: {
+        in: productIds,
+      },
+    },
   });
 
   const line_items: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
+
   products.forEach((product) => {
     line_items.push({
       quantity: 1,
       price_data: {
         currency: "USD",
-        product_data: { name: product.name },
+        product_data: {
+          name: product.name,
+        },
         unit_amount: product.price.toNumber() * 100,
       },
     });
@@ -50,7 +53,11 @@ export async function POST(
       isPaid: false,
       orderItems: {
         create: productIds.map((productId: string) => ({
-          product: { connect: { id: productId } },
+          product: {
+            connect: {
+              id: productId,
+            },
+          },
         })),
       },
     },
@@ -60,11 +67,20 @@ export async function POST(
     line_items,
     mode: "payment",
     billing_address_collection: "required",
-    phone_number_collection: { enabled: true },
+    phone_number_collection: {
+      enabled: true,
+    },
     success_url: `${process.env.FRONTEND_STORE_URL}/cart?success=1`,
     cancel_url: `${process.env.FRONTEND_STORE_URL}/cart?canceled=1`,
-    metadata: { orderId: order.id },
+    metadata: {
+      orderId: order.id,
+    },
   });
 
-  return NextResponse.json({ url: session.url }, { headers: corsHeaders });
+  return NextResponse.json(
+    { url: session.url },
+    {
+      headers: corsHeaders,
+    }
+  );
 }
